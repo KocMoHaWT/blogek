@@ -8,7 +8,4 @@ export class Role {
 
     @Column()
     role: string;
-
-    @Column()
-    role_test: string;
 }
