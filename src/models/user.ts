@@ -25,7 +25,7 @@ export class User {
     password: string
 
     @Column("varchar", { length: 200, nullable: false })
-    logo: string
+    avatar: string
 
     @CreateDateColumn()
     created_at: Date
