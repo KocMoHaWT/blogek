@@ -1,5 +1,7 @@
 import { getManager } from "typeorm";
 import { Blog } from "../interfaces/blog";
+import { convert } from "../utils/convert";
+import { neededColumns } from "./userService";
 
 export const createBlog = async (
   blog: Blog,
@@ -16,26 +18,26 @@ export const createBlog = async (
   return res;
 };
 
-export const getBlog = async (id: string): Promise<Blog> => {
-  console.log('param id', id);
-  
+export const getBlog = async (id: string): Promise<{}> => {
   const res = await getManager().query(
     `
-    SELECT * FROM blogs WHERE id = $1
+    SELECT ${neededColumns}, blogs.id, title, small_description, blogs.created_at FROM blogs 
+    LEFT JOIN users as us
+    ON blogs.author_id = us.id
+    WHERE blogs.id = $1
   `,
     [id]
   );
-  console.log('get blog',res);
-  
+
+  const convertedRes = await convert("author", "user_", res);
+
   if (res.length !== 1) {
     throw new Error();
   }
-  return res.pop();
+  return convertedRes.length === 1 ? convertedRes[0] : convertedRes;
 };
 
-export const updateBlog = async (
-  blog: Blog
-) => {
+export const updateBlog = async (blog: Blog) => {
   await getManager().query(
     `
     UPDATE blogs
@@ -54,4 +56,30 @@ export const deleteBlog = async (id: string) => {
   `,
     [id]
   );
+};
+
+export const getBlogs = async (page = -1, limit = -1): Promise<{}[]> => {
+  const offset = (page - 1) * limit;
+  const res = await getManager().query(
+    `
+    SELECT ${neededColumns}, blogs.id, title, small_description, blogs.created_at FROM blogs 
+    LEFT JOIN users as us
+    ON blogs.author_id = us.id
+    ${page !== -1 ? "LIMIT $1" : ""}
+    ${limit !== -1 ? "OFFSET $2" : ""}
+  `,
+    page === -1 || limit === -1 ? [] : [limit, offset]
+  );
+  return convert("author", "user_", res);
+};
+
+export const getBlogsPage = async (): Promise<{}[]> => {
+  const res = await getManager().query(
+    `
+    SELECT ${neededColumns}, blogs.id, title, small_description, blogs.created_at FROM blogs 
+    LEFT JOIN users as us
+    ON blogs.author_id = us.id
+  `
+  );
+  return convert("author", "user_", res);
 };

@@ -1,6 +1,9 @@
 import { getManager } from "typeorm";
 import { User } from "../interfaces/user";
 
+export const neededColumns =
+  "us.id as user_id, first_name as user_firstName, last_name as user_lastName, email as user_email";
+
 export const createUser = async (user: User): Promise<User> => {
   const res = await getManager().query(
     `

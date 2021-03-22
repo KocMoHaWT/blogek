@@ -1,6 +1,6 @@
 import * as express from "express";
 import { UserRequest } from "../interfaces/userRequest";
-import * as BlogService from '../service/blogService';
+import * as BlogService from "../service/blogService";
 
 export const createBlog = async (
   req: UserRequest,
@@ -47,15 +47,53 @@ export const getBlog = async (
   res: express.Response
 ): Promise<any> => {
   try {
-    console.log('gddfgdf',req.params.id);
-    
+    console.log("gddfgdf", req.params.id);
+
     const blog = await BlogService.getBlog(req.params.id);
     return res.status(200).json({
-      blog
+      blog,
     });
   } catch (error) {
     return res.status(404).json({
       message: "shit with getting shittiest blog",
+    });
+  }
+};
+
+export const getBlogs = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  try {
+    const blogs = await BlogService.getBlogs();
+    return res.status(200).json({
+      blogs,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      message: "shit with getting shittiest blogs",
+    });
+  }
+};
+
+export const getBlogsPage = async (
+  req: express.Request,
+  res: express.Response
+): Promise<any> => {
+  const { page, items } = req.params;
+  if (!page || !items) {
+    return res.status(401).json({
+      message: "shit with params",
+    });
+  }
+  try {
+    const blogs = await BlogService.getBlogs(+page, +items);
+    return res.status(200).json({
+      blogs,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      message: "shit with getting shittiest blogs",
     });
   }
 };
