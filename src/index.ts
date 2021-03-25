@@ -5,7 +5,8 @@ import * as jwt from "jsonwebtoken";
 import envs from "./config";
 import authMiddleware from "./middlewares/authMiddleware";
 import userRouter from "./route/userRoutes";
-import blogRouter from "./route/blogRutes";
+import blogRouter from "./route/blogRoutes";
+import postRouter from './route/postRoutes';
 
 const app = express();
 const port = 3000;
@@ -15,6 +16,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use("/user", userRouter);
 app.use("/blog", blogRouter);
+app.use("/post", postRouter);
+
+
 
 app.get("/", (req, res) => {
   res.send(`Hello World!`);

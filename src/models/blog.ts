@@ -10,6 +10,7 @@ import {
   JoinColumn,
   OneToMany,
 } from "typeorm";
+import { BlogLikes } from "./blogLikes";
 import { Post } from "./post";
 import { User } from "./user";
 
@@ -32,6 +33,10 @@ export class Blog {
 
   @DeleteDateColumn()
   delete_at: Date
+
+  @OneToMany(() => BlogLikes, (blogLikes) => blogLikes.blog)
+  @JoinColumn()
+  blog_likes = BlogLikes;
 
   @OneToMany(() => Post, (post) => post.blog)
   @JoinColumn({ name: "post_id" })

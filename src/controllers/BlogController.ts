@@ -1,6 +1,7 @@
 import * as express from "express";
 import { UserRequest } from "../interfaces/userRequest";
 import * as BlogService from "../service/blogService";
+import * as PostService from "../service/postService";
 
 export const createBlog = async (
   req: UserRequest,
@@ -65,7 +66,10 @@ export const getBlogs = async (
   res: express.Response
 ): Promise<any> => {
   try {
-    const blogs = await BlogService.getBlogs();
+    const { skip = 0, limit = 20 } = req.query;
+    const blogs = await BlogService.getBlogs(+limit, +skip);
+
+    
     return res.status(200).json({
       blogs,
     });
@@ -76,20 +80,22 @@ export const getBlogs = async (
   }
 };
 
-export const getBlogsPage = async (
-  req: express.Request,
+export const getBlogPosts = async (
+  req: UserRequest,
   res: express.Response
 ): Promise<any> => {
-  const { page, items } = req.params;
-  if (!page || !items) {
-    return res.status(401).json({
-      message: "shit with params",
-    });
-  }
   try {
-    const blogs = await BlogService.getBlogs(+page, +items);
+    const { skip = 0, limit = 20 } = req.query;
+    const blog = await BlogService.getBlog(req.params.id);
+    console.log(blog);
+    
+    const blogPosts = await PostService.getBlogPosts(
+      blog.id,
+      +skip,
+      +limit
+    );
     return res.status(200).json({
-      blogs,
+      blogPosts,
     });
   } catch (error) {
     return res.status(404).json({

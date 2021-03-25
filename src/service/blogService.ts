@@ -18,7 +18,7 @@ export const createBlog = async (
   return res;
 };
 
-export const getBlog = async (id: string): Promise<{}> => {
+export const getBlog = async (id: string): Promise<any> => {
   const res = await getManager().query(
     `
     SELECT ${neededColumns}, blogs.id, title, small_description, blogs.created_at FROM blogs 
@@ -58,28 +58,36 @@ export const deleteBlog = async (id: string) => {
   );
 };
 
-export const getBlogs = async (page = -1, limit = -1): Promise<{}[]> => {
-  const offset = (page - 1) * limit;
+export const getBlogs = async (limit = 20, skip = 0): Promise<{}[]> => {
   const res = await getManager().query(
     `
     SELECT ${neededColumns}, blogs.id, title, small_description, blogs.created_at FROM blogs 
     LEFT JOIN users as us
     ON blogs.author_id = us.id
-    ${page !== -1 ? "LIMIT $1" : ""}
-    ${limit !== -1 ? "OFFSET $2" : ""}
+    LIMIT $1
+    OFFSET $2
   `,
-    page === -1 || limit === -1 ? [] : [limit, offset]
+    [limit, skip]
   );
   return convert("author", "user_", res);
 };
 
-export const getBlogsPage = async (): Promise<{}[]> => {
-  const res = await getManager().query(
+export const hasPermissionToBlog = async (
+  blogId: string,
+  userId: string
+): Promise<boolean> => {
+  console.log(blogId);
+  
+  const res =  await getManager().query(
     `
-    SELECT ${neededColumns}, blogs.id, title, small_description, blogs.created_at FROM blogs 
-    LEFT JOIN users as us
-    ON blogs.author_id = us.id
-  `
+    SELECT author_id as author FROM blogs
+    WHERE id = $1
+  `,
+    [blogId]
   );
-  return convert("author", "user_", res);
+  if (res.length !== 1) {
+    throw new Error();
+  }
+  
+  return res[0].author === userId
 };

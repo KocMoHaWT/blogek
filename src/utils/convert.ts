@@ -1,8 +1,11 @@
-export const convert = async (
+import { Blog } from "../interfaces/blog";
+import { Post } from "../interfaces/post";
+
+export const convert = (
   key: string,
   replaceBy: string,
   responses: { [key: string]: string }[]
-) => {
+): { [key: string]: string | {} }[] => {
   if (!Array.isArray(responses)) {
     responses = [responses];
   }
